@@ -12,7 +12,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-        .floating-image {
+     .floating-image {
             position: absolute;
             width: 150px;
             opacity: 0;
@@ -64,7 +64,7 @@ body {
             const img = document.createElement('img');
             img.src = src;
             img.classList.add('floating-image');
-            img.style.width = `${Math.random() * 100 + 150}px`; // Increase random size (150px - 250px)
+            img.style.width = `${Math.random() * 100 + 150}px`; // Random size (150px - 250px)
             img.style.left = `${Math.random() * window.innerWidth}px`;
             img.style.top = `${Math.random() * window.innerHeight}px`;
             img.style.zIndex = addedImages.size + 1;
@@ -77,34 +77,36 @@ body {
                 img.style.opacity = 1;
             }, 100);
 
-            animateFloating(img);
+            bounceImage(img);
         }
 
-        function animateFloating(img) {
-            let startX = Math.random() * window.innerWidth;
-            let startY = Math.random() * window.innerHeight;
-            let endX = Math.random() * window.innerWidth;
-            let endY = Math.random() * window.innerHeight;
+        function bounceImage(img) {
+            let speedX = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? 1 : -1); // Random speed and direction
+            let speedY = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? 1 : -1);
+            let posX = parseFloat(img.style.left);
+            let posY = parseFloat(img.style.top);
 
-            img.style.position = "absolute";
-            img.style.left = `${startX}px`;
-            img.style.top = `${startY}px`;
+            function move() {
+                posX += speedX;
+                posY += speedY;
 
-            function moveImage() {
-                img.style.transition = "transform 10s linear";
-                img.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
+                // Bounce off left and right edges
+                if (posX <= 0 || posX + img.clientWidth >= window.innerWidth) {
+                    speedX *= -1; // Reverse direction
+                }
 
-                // Randomly assign new destination after movement completes
-                setTimeout(() => {
-                    startX = endX;
-                    startY = endY;
-                    endX = Math.random() * window.innerWidth;
-                    endY = Math.random() * window.innerHeight;
-                    moveImage();
-                }, 10000); // Change direction every 10 seconds
+                // Bounce off top and bottom edges
+                if (posY <= 0 || posY + img.clientHeight >= window.innerHeight) {
+                    speedY *= -1; // Reverse direction
+                }
+
+                img.style.left = `${posX}px`;
+                img.style.top = `${posY}px`;
+
+                requestAnimationFrame(move);
             }
 
-            moveImage();
+            move(); // Start movement
         }
 
         function removeImage(img, src) {
