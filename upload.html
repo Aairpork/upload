@@ -3,75 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Floating Images</title>
+    <title>Upload Image</title>
     <style>
-body {
-    background: url(https://drive.google.com/file/d/1O6utGKmYT1XR7Lp8uhKuFYMJtf5EjBhC/view?usp=drive_link) no-repeat center center fixed;
-    background-size: cover;
-    color: white;
-    text-align: center;
-    font-family: Arial, sans-serif;
-}
+        body {
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
 
-        .floating-image {
-            position: absolute;
-            width: 100px;
-            transition: transform 5s linear;
+        #uploadContainer {
+            width: 80%;
+            max-width: 400px;
+            height: 200px;
+            border: 2px dashed white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent box */
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        #uploadContainer:hover {
+            border-color: lightgray;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #uploadContainer p {
+            margin: 0;
+            font-size: 16px;
+            color: white;
+        }
+
+        #uploadInput {
+            display: none;
         }
 
         button {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            margin-top: 20px;
             padding: 10px;
             border: none;
             background: white;
             color: black;
             font-size: 16px;
             cursor: pointer;
-            z-index: 1000;
+        }
+
+        #previewContainer {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .preview-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid white;
         }
     </style>
 </head>
 <body>
-    <button onclick="goBack()">Upload More Images</button>
-    
+    <h1>Upload Your Image</h1>
+
+    <div id="uploadContainer">
+        <p>Drag & Drop Image Here or Click to Upload</p>
+        <input type="file" id="uploadInput" accept="image/*">
+    </div>
+
+    <h3>Uploaded Images:</h3>
+    <div id="previewContainer"></div>
+
+    <button onclick="goToDisplay()">View Floating Images</button>
+
     <script>
-        function goBack() {
-            window.location.href = "upload.html";
+        const uploadContainer = document.getElementById('uploadContainer');
+        const uploadInput = document.getElementById('uploadInput');
+        const previewContainer = document.getElementById('previewContainer');
+
+        // Load stored images on page load
+        window.onload = function () {
+            loadPreviewImages();
+        };
+
+        uploadContainer.addEventListener('click', () => uploadInput.click());
+
+        uploadInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        });
+
+        // Drag & Drop functionality
+        uploadContainer.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            uploadContainer.style.borderColor = "lightgray";
+        });
+
+        uploadContainer.addEventListener('dragleave', () => {
+            uploadContainer.style.borderColor = "white";
+        });
+
+        uploadContainer.addEventListener('drop', (event) => {
+            event.preventDefault();
+            uploadContainer.style.borderColor = "white";
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                processFile(file);
+            }
+        });
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                saveImage(e.target.result);
+                addPreviewImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
         }
 
-        function loadFloatingImages() {
+        function saveImage(imageData) {
             let images = JSON.parse(localStorage.getItem("floatingImages")) || [];
-            images.forEach((src, index) => {
-                createFloatingImage(src, index);
+            images.push(imageData);
+            localStorage.setItem("floatingImages", JSON.stringify(images));
+        }
+
+        function addPreviewImage(imageSrc) {
+            const img = document.createElement('img');
+            img.src = imageSrc;
+            img.classList.add('preview-image');
+            previewContainer.appendChild(img);
+        }
+
+        function loadPreviewImages() {
+            let images = JSON.parse(localStorage.getItem("floatingImages")) || [];
+            previewContainer.innerHTML = ''; // Clear previews before loading
+            images.forEach((src) => {
+                addPreviewImage(src);
             });
         }
 
-        function createFloatingImage(src, index) {
-            const img = document.createElement('img');
-            img.src = src;
-            img.classList.add('floating-image');
-            img.style.width = `${Math.random() * 80 + 50}px`; // Random size
-            img.style.left = `${Math.random() * window.innerWidth}px`;
-            img.style.top = `${Math.random() * window.innerHeight}px`;
-            img.style.zIndex = index + 1;
-
-            document.body.appendChild(img);
-
-            animateFloating(img);
+        function goToDisplay() {
+            window.location.href = "display.html";
         }
-
-        function animateFloating(img) {
-            let angle = Math.random() * 360;
-            setInterval(() => {
-                img.style.transform = `translate(${Math.sin(angle) * 50}px, ${Math.cos(angle) * 50}px)`;
-                angle += 0.1;
-            }, 100);
-        }
-
-        window.onload = loadFloatingImages;
     </script>
 </body>
 </html>
