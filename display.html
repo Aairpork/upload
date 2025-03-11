@@ -14,9 +14,9 @@ body {
 
         .floating-image {
             position: absolute;
-            width: 100px;
+            width: 150px;
             opacity: 0;
-            transition: opacity 1s ease-in-out, transform 5s linear;
+            transition: opacity 1s ease-in-out;
             cursor: pointer;
         }
 
@@ -25,9 +25,26 @@ body {
             transform: scale(0.5);
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
+
+        /* Clear All Button */
+        .clear-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Clear All Images Button -->
+    <button class="clear-button" onclick="clearAllImages()">Clear All Images</button>
 
     <script>
         let addedImages = new Set(); // Store added image sources to prevent duplicates
@@ -47,7 +64,7 @@ body {
             const img = document.createElement('img');
             img.src = src;
             img.classList.add('floating-image');
-            img.style.width = `${Math.random() * 100 + 150}px`; // Random size
+            img.style.width = `${Math.random() * 100 + 150}px`; // Increase random size (150px - 250px)
             img.style.left = `${Math.random() * window.innerWidth}px`;
             img.style.top = `${Math.random() * window.innerHeight}px`;
             img.style.zIndex = addedImages.size + 1;
@@ -64,11 +81,30 @@ body {
         }
 
         function animateFloating(img) {
-            let angle = Math.random() * 360;
-            setInterval(() => {
-                img.style.transform = `translate(${Math.sin(angle) * 50}px, ${Math.cos(angle) * 50}px)`;
-                angle += 0.1;
-            }, 100);
+            let startX = Math.random() * window.innerWidth;
+            let startY = Math.random() * window.innerHeight;
+            let endX = Math.random() * window.innerWidth;
+            let endY = Math.random() * window.innerHeight;
+
+            img.style.position = "absolute";
+            img.style.left = `${startX}px`;
+            img.style.top = `${startY}px`;
+
+            function moveImage() {
+                img.style.transition = "transform 10s linear";
+                img.style.transform = `translate(${endX - startX}px, ${endY - startY}px)`;
+
+                // Randomly assign new destination after movement completes
+                setTimeout(() => {
+                    startX = endX;
+                    startY = endY;
+                    endX = Math.random() * window.innerWidth;
+                    endY = Math.random() * window.innerHeight;
+                    moveImage();
+                }, 10000); // Change direction every 10 seconds
+            }
+
+            moveImage();
         }
 
         function removeImage(img, src) {
@@ -79,12 +115,18 @@ body {
 
                 // Remove from localStorage
                 let images = JSON.parse(localStorage.getItem("floatingImages")) || [];
-                images = images.filter(image => image !== src);
+                images = images.filter(image => image !== src); // Remove the selected image
                 localStorage.setItem("floatingImages", JSON.stringify(images));
 
                 // Remove from the tracking set
                 addedImages.delete(src);
             }, 500); // Wait for animation to finish
+        }
+
+        function clearAllImages() {
+            localStorage.removeItem("floatingImages"); // Remove all images from localStorage
+            document.querySelectorAll(".floating-image").forEach(img => img.remove()); // Remove all images from the page
+            addedImages.clear(); // Reset tracking set
         }
 
         // Watch for new uploads and smoothly add images
