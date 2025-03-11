@@ -3,10 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=upload.html">
+    <title>Floating Image Scanner</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        button {
+            margin: 15px;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            background: white;
+            color: black;
+            width: 200px;
+        }
+    </style>
 </head>
 <body>
-    <p>If you are not redirected, <a href="upload.html">click here</a>.</p>
+    <h1>Welcome to Floating Image Scanner</h1>
+    <button onclick="location.href='upload.html'">Upload Image</button>
+    <button onclick="location.href='display.html'">View Floating Images</button>
 </body>
 </html>
