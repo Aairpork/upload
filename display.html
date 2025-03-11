@@ -12,11 +12,18 @@ body {
     font-family: Arial, sans-serif;
 }
 
-      .floating-image {
+        .floating-image {
             position: absolute;
-            width: 800px;
+            width: 100px;
             opacity: 0;
             transition: opacity 1s ease-in-out, transform 5s linear;
+            cursor: pointer;
+        }
+
+        .remove-effect {
+            opacity: 0 !important;
+            transform: scale(0.5);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -44,6 +51,7 @@ body {
             img.style.left = `${Math.random() * window.innerWidth}px`;
             img.style.top = `${Math.random() * window.innerHeight}px`;
             img.style.zIndex = addedImages.size + 1;
+            img.onclick = () => removeImage(img, src);
 
             document.body.appendChild(img);
 
@@ -61,6 +69,22 @@ body {
                 img.style.transform = `translate(${Math.sin(angle) * 50}px, ${Math.cos(angle) * 50}px)`;
                 angle += 0.1;
             }, 100);
+        }
+
+        function removeImage(img, src) {
+            img.classList.add('remove-effect'); // Add fade-out effect
+
+            setTimeout(() => {
+                img.remove(); // Remove image from the screen
+
+                // Remove from localStorage
+                let images = JSON.parse(localStorage.getItem("floatingImages")) || [];
+                images = images.filter(image => image !== src);
+                localStorage.setItem("floatingImages", JSON.stringify(images));
+
+                // Remove from the tracking set
+                addedImages.delete(src);
+            }, 500); // Wait for animation to finish
         }
 
         // Watch for new uploads and smoothly add images
