@@ -13,35 +13,46 @@
             font-family: Arial, sans-serif;
 }
 
-        .floating-image {
+      .floating-image {
             position: absolute;
-            width: 300px;
-            transition: transform 5s linear;
+            width: 400px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, transform 5s linear;
         }
     </style>
 </head>
 <body>
 
     <script>
+        let addedImages = new Set(); // Store added image sources to prevent duplicates
+
         function loadFloatingImages() {
             let images = JSON.parse(localStorage.getItem("floatingImages")) || [];
-            document.body.innerHTML = ''; // Clear previous images
 
-            images.forEach((src, index) => {
-                createFloatingImage(src, index);
+            images.forEach((src) => {
+                if (!addedImages.has(src)) {
+                    createFloatingImage(src);
+                    addedImages.add(src);
+                }
             });
         }
 
-        function createFloatingImage(src, index) {
+        function createFloatingImage(src) {
             const img = document.createElement('img');
             img.src = src;
             img.classList.add('floating-image');
             img.style.width = `${Math.random() * 80 + 50}px`; // Random size
             img.style.left = `${Math.random() * window.innerWidth}px`;
             img.style.top = `${Math.random() * window.innerHeight}px`;
-            img.style.zIndex = index + 1;
+            img.style.zIndex = addedImages.size + 1;
 
             document.body.appendChild(img);
+
+            // Smooth fade-in effect
+            setTimeout(() => {
+                img.style.opacity = 1;
+            }, 100);
+
             animateFloating(img);
         }
 
@@ -53,14 +64,14 @@
             }, 100);
         }
 
-        // Automatically update when `localStorage` changes
+        // Watch for new uploads and smoothly add images
         window.addEventListener('storage', (event) => {
             if (event.key === "floatingImages") {
                 loadFloatingImages();
             }
         });
 
-        // Initial load
+        // Initial load (on page open)
         window.onload = loadFloatingImages;
     </script>
 </body>
