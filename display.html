@@ -3,113 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Image</title>
+    <title>Floating Images</title>
     <style>
         body {
-            background-color: black;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
             color: white;
             text-align: center;
             font-family: Arial, sans-serif;
         }
 
-        #uploadContainer {
-            width: 80%;
-            max-width: 400px;
-            height: 200px;
-            border: 2px dashed white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 30px auto;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        #uploadContainer p {
-            margin: 0;
-            font-size: 16px;
-            color: white;
-        }
-
-        #uploadInput {
-            display: none;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 10px;
-            border: none;
-            background: white;
-            color: black;
-            font-size: 16px;
-            cursor: pointer;
+        .floating-image {
+            position: absolute;
+            width: 200px;
+            transition: transform 5s linear;
         }
     </style>
 </head>
 <body>
-    <h1>Upload Your Image</h1>
-
-    <!-- Drag & Drop Upload Area -->
-    <div id="uploadContainer">
-        <p>Drag & Drop Image Here or Click to Upload</p>
-        <input type="file" id="uploadInput" accept="image/*">
-    </div>
-
-    <button onclick="goToDisplay()">View Floating Images</button>
 
     <script>
-        const uploadContainer = document.getElementById('uploadContainer');
-        const uploadInput = document.getElementById('uploadInput');
-
-        // Click to trigger file input
-        uploadContainer.addEventListener('click', () => uploadInput.click());
-
-        // Handle file selection
-        uploadInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                processFile(file);
-            }
-        });
-
-        // Drag & Drop functionality
-        uploadContainer.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            uploadContainer.style.borderColor = "lightgray"; // Highlight effect
-        });
-
-        uploadContainer.addEventListener('dragleave', () => {
-            uploadContainer.style.borderColor = "white"; // Reset border
-        });
-
-        uploadContainer.addEventListener('drop', (event) => {
-            event.preventDefault();
-            uploadContainer.style.borderColor = "white"; // Reset border
-
-            const file = event.dataTransfer.files[0];
-            if (file) {
-                processFile(file);
-            }
-        });
-
-        function processFile(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                saveImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function saveImage(imageData) {
+        function loadFloatingImages() {
             let images = JSON.parse(localStorage.getItem("floatingImages")) || [];
-            images.push(imageData);
-            localStorage.setItem("floatingImages", JSON.stringify(images));
-            alert("Image uploaded successfully!");
+            document.body.innerHTML = ''; // Clear previous images
+
+            images.forEach((src, index) => {
+                createFloatingImage(src, index);
+            });
         }
 
-        function goToDisplay() {
-            window.location.href = "display.html";
+        function createFloatingImage(src, index) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.classList.add('floating-image');
+            img.style.width = `${Math.random() * 80 + 50}px`; // Random size
+            img.style.left = `${Math.random() * window.innerWidth}px`;
+            img.style.top = `${Math.random() * window.innerHeight}px`;
+            img.style.zIndex = index + 1;
+
+            document.body.appendChild(img);
+            animateFloating(img);
         }
+
+        function animateFloating(img) {
+            let angle = Math.random() * 360;
+            setInterval(() => {
+                img.style.transform = `translate(${Math.sin(angle) * 50}px, ${Math.cos(angle) * 50}px)`;
+                angle += 0.1;
+            }, 100);
+        }
+
+        // Automatically update when `localStorage` changes
+        window.addEventListener('storage', (event) => {
+            if (event.key === "floatingImages") {
+                loadFloatingImages();
+            }
+        });
+
+        // Initial load
+        window.onload = loadFloatingImages;
     </script>
 </body>
 </html>
